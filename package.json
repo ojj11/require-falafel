@@ -1,8 +1,11 @@
 {
   "name": "require-falafel",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "Use falafel to rewrite require'd modules in node.",
   "main": "lib.js",
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "directories": {
     "test": "test"
   },
