@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Use falafel to rewrite require'd modules in node.",
   "main": "lib.js",
+  "engines": {
+   "node": ">=10.0.0"
+  },
   "directories": {
     "test": "test"
   },
