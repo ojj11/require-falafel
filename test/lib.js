@@ -62,6 +62,10 @@ describe("Require-Falafel", function() {
   });
 
   it("should only replace top-level modules when INCLUDE_FIRST_LEVEL_NODE_MODULES is set", function() {
+    if (!module.parent.path) {
+      // this is only supported in node v11+
+      this.skip();
+    }
     const transformation = makeUserAgentReplacer(RequireFalafel.INCLUDE_FIRST_LEVEL_NODE_MODULES);
     transformation.applyForBlock(function() {
       const lib7 = require("./fake_node_modules/lib-7.js");
@@ -75,6 +79,10 @@ describe("Require-Falafel", function() {
   });
 
   it("should not replace node_modules when INCLUDE_NO_NODE_MODULES is set", function() {
+    if (!module.parent.path) {
+      // this is only supported in node v12+
+      this.skip();
+    }
     const transformation = makeUserAgentReplacer(RequireFalafel.INCLUDE_NO_NODE_MODULES);
     transformation.applyForBlock(function() {
       const lib7 = require("./fake_node_modules/lib-7.js");
@@ -126,7 +134,53 @@ describe("Require-Falafel", function() {
       });
       assert.fail("unreachable");
     } catch (e) {
-      assert.equal("Unexpected token '~'", e.message)
+      assert.equal("Unexpected token", e.message.slice(0, 16))
     }
+  });
+
+  it("should work with async functions", async function() {
+    const transformation = makeUserAgentReplacer(RequireFalafel.INCLUDE_NODE_MODULES);
+
+    // the require hook will keep working until the transformation is `await`ed
+    await transformation.applyForBlock(async function() {
+      const promise = new Promise((resolve) => {
+        setImmediate(function() {
+          const lib7 = require("./fake_node_modules/lib-7.js");
+          assert.equal("github.com/ojj11/require-falafel", lib7.userAgent);
+          resolve();
+        });
+      });
+      await promise;
+    });
+
+    const lib7 = require("./fake_node_modules/lib-7.js");
+    assert.equal("lib-7", lib7.userAgent);
+    assert.equal("lib-7", lib7.dependentUserAgent);
+  });
+
+  it("should work with failing async functions", async function() {
+    const transformation = makeUserAgentReplacer(RequireFalafel.INCLUDE_NODE_MODULES);
+
+    // the require hook will keep working until the transformation is `await`ed
+    const failingBlock = transformation.applyForBlock(async function() {
+      const promise = new Promise((resolve, reject) => {
+        setImmediate(function() {
+          reject(new Error("failing block"));
+        });
+      });
+      await promise;
+    });
+
+    try {
+      await failingBlock;
+      assert.fail("unreachable");
+    } catch(e) {
+      // drop - expected.
+    }
+
+    // require hook should still be removed after `await`
+    const lib7 = require("./fake_node_modules/lib-7.js");
+    assert.equal("lib-7", lib7.userAgent);
+    assert.equal("lib-7", lib7.dependentUserAgent);
   });
 });

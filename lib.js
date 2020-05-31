@@ -1,24 +1,27 @@
+const util = require("util");
 const vm = require("vm");
-const moduleInternals = require("module");
 const fs = require("fs");
 const falafel = require("falafel");
-const dirname = require("path").dirname;
-const relative = require("path").relative;
+const {dirname, relative} = require("path");
+const Module = require("module");
 
 function isNodeModule(path) {
+  if (module.parent.path == undefined) {
+    throw new Error("INCLUDE_FIRST_LEVEL_NODE_MODULES and INCLUDE_NO_NODE_MODULES are not supported on this version of node");
+  }
   const relativePath = relative(module.parent.path, path);
   return relativePath.indexOf("node_modules") != -1;
 }
 
 function RequireFalafel(typeOfReplacement, transformer) {
-  const originalCompile = moduleInternals.prototype._compile;
+  const originalCompile = Module.prototype._compile;
   this.originalCompile = originalCompile;
   this.originalCache = Object.keys(require.cache);
   this.typeOfReplacement = typeOfReplacement;
   this.newCompile = function FalafelCompile(content, path) {
 
     let shouldSwap = false;
-    if (!typeOfReplacement || typeOfReplacement == RequireFalafel.INCLUDE_NO_NODE_MODULES) {
+    if (typeOfReplacement == RequireFalafel.INCLUDE_NO_NODE_MODULES) {
       shouldSwap = !isNodeModule(path);
     }
 
@@ -47,19 +50,32 @@ RequireFalafel.INCLUDE_NODE_MODULES = 3;
 
 RequireFalafel.prototype.applyForBlock = function(block) {
   this.replaceRequire();
+  let output;
   try {
-    block();
+    output = block();
+    return output;
   } finally {
-    this.restoreRequire();
+    if (util.types.isPromise(output)) {
+      const restoreRequire = this.restoreRequire.bind(this);
+      return (async function(requireFalafel) {
+        try {
+          return await output;
+        } finally {
+          requireFalafel.restoreRequire();
+        }
+      })(this);
+    } else {
+      this.restoreRequire();
+    }
   }
 };
 
 RequireFalafel.prototype.replaceRequire = function() {
-  moduleInternals.prototype._compile = this.newCompile;
+  Module.prototype._compile = this.newCompile;
 };
 
 RequireFalafel.prototype.restoreRequire = function() {
-  moduleInternals.prototype._compile = this.originalCompile;
+  Module.prototype._compile = this.originalCompile;
   Object.keys(require.cache)
     .filter((key) => this.originalCache.indexOf(key) == -1)
     .forEach((key) => {
