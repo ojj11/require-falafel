@@ -2,6 +2,7 @@ Require-Falafel
 ===============
 
 ![Node.js CI](https://github.com/ojj11/require-falafel/workflows/Node.js%20CI/badge.svg) ![Publish on merge](https://github.com/ojj11/require-falafel/workflows/Publish%20on%20merge/badge.svg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fojj11%2Frequire-falafel.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fojj11%2Frequire-falafel?ref=badge_shield)
 
 **Use [falafel](https://www.npmjs.com/package/falafel) to rewrite require'd
 modules in node.**
@@ -15,6 +16,9 @@ loading.
 ```zsh
 npm install require-falafel --save
 ```
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fojj11%2Frequire-falafel.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fojj11%2Frequire-falafel?ref=badge_large)
 
 ## Introduction
 
