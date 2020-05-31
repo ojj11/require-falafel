@@ -20,10 +20,10 @@ jobs:
     - name: Automated Version Bump
       uses: phips28/gh-action-bump-version@v7.1.0
       with:
-        tag-prefix: "v"
+        tag-prefix: ""
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - run: npm publish
       env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,6 +1,8 @@
 Require-Falafel
 ===============
 
+![Node.js CI](https://github.com/ojj11/require-falafel/workflows/Node.js%20CI/badge.svg) ![Publish on merge](https://github.com/ojj11/require-falafel/workflows/Publish%20on%20merge/badge.svg)
+
 **Use [falafel](https://www.npmjs.com/package/falafel) to rewrite require'd
 modules in node.**
 
