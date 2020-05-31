@@ -138,10 +138,10 @@ typeOfReplacement should be one of:
 
 - `RequireFalafel.INCLUDE_NO_NODE_MODULES`, the most conservative, will
   transform `./` and `../` imports, but will not transform any npm modules in
-  node_modules folders
+  node_modules folders. Only available in node v11+.
 - `RequireFalafel.INCLUDE_FIRST_LEVEL_NODE_MODULES` same as above, but will
   transform only the top level of node_modules that are imported from `./` or
-  `../` code
+  `../` code. Only available in node v11+.
 - `RequireFalafel.INCLUDE_NODE_MODULES` the most liberal, will
   transform all require calls, even those inside node_modules
 
@@ -168,8 +168,20 @@ const module2 = require("module2");
 // block
 ```
 
-Please note that this method won't work correctly on any asynchronous `require`
-calls (but it's unlikely that this would affect normal usage).
+This method _will_ work async functions, but the require hook will continue to
+apply until `await` is called:
+
+```JavaScript
+// always immediately await:
+await requireFalafel.applyForBlock(async function() {
+  const module2 = require("module2");
+  // module2 will be transformed and loaded
+});
+
+const module2 = require("module2");
+// module2 will be re-loaded, but not transformed because `await` has already
+// been called on `applyForBlock`
+```
 
 ### `requireFalafel.replaceRequire()`
 
