@@ -23,14 +23,14 @@ function RequireFalafel(typeOfReplacement, transformer) {
     let shouldSwap = false;
     if (typeOfReplacement == RequireFalafel.INCLUDE_NO_NODE_MODULES) {
       shouldSwap = !isNodeModule(path);
-    }
-
-    if (typeOfReplacement == RequireFalafel.INCLUDE_FIRST_LEVEL_NODE_MODULES) {
+    } else if (typeOfReplacement == RequireFalafel.INCLUDE_FIRST_LEVEL_NODE_MODULES) {
       shouldSwap = !isNodeModule(this.parent.path);
-    }
-
-    if (typeOfReplacement == RequireFalafel.INCLUDE_NODE_MODULES) {
+    } else if (typeOfReplacement == RequireFalafel.INCLUDE_NODE_MODULES) {
       shouldSwap = true;
+    } else if (typeof typeOfReplacement.indexOf == "function") {
+      shouldSwap = typeOfReplacement.indexOf(path) != -1;
+    } else {
+      throw new Error("new RequireFalafel(type, transform) called with unexpected type parameter");
     }
 
     if (shouldSwap) {

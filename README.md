@@ -138,15 +138,17 @@ const requireFalafel = new RequireFalafel(
 
 typeOfReplacement should be one of:
 
-- `RequireFalafel.INCLUDE_NO_NODE_MODULES`, the most conservative, will
-  transform `./` and `../` imports, but will not transform any npm modules in
-  node_modules folders. Only available in node v11+.
+- `['/absolute/paths/to/files.js', require.resolve('module-names')]` will
+  transform only the absolute paths specified in an array. Use
+  `require.resolve` to get the absolute paths of libraries.
+- `RequireFalafel.INCLUDE_NO_NODE_MODULES`, will transform `./` and `../`
+  imports, but will not transform any npm modules in node_modules folders.
+  Only available in node v11+.
 - `RequireFalafel.INCLUDE_FIRST_LEVEL_NODE_MODULES` same as above, but will
   transform only the top level of node_modules that are imported from `./` or
   `../` code. Only available in node v11+.
 - `RequireFalafel.INCLUDE_NODE_MODULES` the most liberal, will
   transform all require calls, even those inside node_modules
-
 
 ### `requireFalafel.applyForBlock(block)`
 
