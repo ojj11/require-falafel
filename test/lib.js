@@ -95,6 +95,22 @@ describe("Require-Falafel", function() {
     });
   });
 
+  it("should replace matching paths", function() {
+    const transformation = makeUserAgentReplacer([require.resolve("./fake_node_modules/lib-7.js")]);
+    transformation.applyForBlock(function() {
+      const lib7 = require("./fake_node_modules/lib-7.js");
+      assert.equal("github.com/ojj11/require-falafel", lib7.userAgent);
+    });
+  });
+
+  it("should not replace non-matching paths", function() {
+    const transformation = makeUserAgentReplacer(['']);
+    transformation.applyForBlock(function() {
+      const lib7 = require("./fake_node_modules/lib-7.js");
+      assert.equal("lib-7", lib7.userAgent);
+    });
+  });
+
   it("should work for inline code", function() {
     const transformation = makeUserAgentReplacer(RequireFalafel.INCLUDE_NODE_MODULES);
 
@@ -134,7 +150,28 @@ describe("Require-Falafel", function() {
       });
       assert.fail("unreachable");
     } catch (e) {
-      assert.equal("Unexpected token", e.message.slice(0, 16))
+      assert.equal("Unexpected token", e.message.slice(0, 16));
+    }
+  });
+
+  it("should throw when invalid typeOfReplacement given", function() {
+    try {
+      const transformation = new RequireFalafel(
+        17,
+        function (node) {
+          if (node.type == "Literal" && node.value == "lib-7") {
+            node.update("invalid ~ javascript");
+          }
+        });
+      transformation.applyForBlock(function() {
+        require("./fake_node_modules/lib-7.js");
+      });
+      assert.fail("unreachable");
+    } catch (e) {
+      assert.equal(
+        "new RequireFalafel(type, transform) called with unexpected type parameter",
+        e.message
+      );
     }
   });
 
